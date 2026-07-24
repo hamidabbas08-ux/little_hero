@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'features/alphabet/screens/alphabet_lesson_screen.dart';
+
 void main() {
   runApp(const LittleHeroApp());
 }
@@ -23,6 +25,23 @@ class LittleHeroApp extends StatelessWidget {
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _openCard(BuildContext context, String title) {
+    if (title == 'Alphabet') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const AlphabetLessonScreen()),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$title is coming next!'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +91,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: null,
-                      icon: Icon(Icons.settings_rounded, size: 30),
+                      onPressed: () {},
+                      icon: const Icon(Icons.settings_rounded, size: 30),
                     ),
                   ],
                 ),
@@ -94,43 +113,49 @@ class HomeScreen extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
-                  childAspectRatio: 1.0,
-                  children: const [
+                  childAspectRatio: 1,
+                  children: [
                     LearningCard(
                       title: 'Alphabet',
                       subtitle: 'A B C',
                       emoji: '🔤',
-                      color: Color(0xFFFFD166),
+                      color: const Color(0xFFFFD166),
+                      onTap: () => _openCard(context, 'Alphabet'),
                     ),
                     LearningCard(
                       title: 'Numbers',
                       subtitle: '1 2 3',
                       emoji: '🔢',
-                      color: Color(0xFF8DE4AF),
+                      color: const Color(0xFF8DE4AF),
+                      onTap: () => _openCard(context, 'Numbers'),
                     ),
                     LearningCard(
                       title: 'Colors',
                       subtitle: 'Learn colors',
                       emoji: '🎨',
-                      color: Color(0xFFFF9EB5),
+                      color: const Color(0xFFFF9EB5),
+                      onTap: () => _openCard(context, 'Colors'),
                     ),
                     LearningCard(
                       title: 'Shapes',
                       subtitle: 'Circle & Square',
                       emoji: '🔺',
-                      color: Color(0xFF9ED9FF),
+                      color: const Color(0xFF9ED9FF),
+                      onTap: () => _openCard(context, 'Shapes'),
                     ),
                     LearningCard(
                       title: 'Stories',
                       subtitle: 'Listen & read',
                       emoji: '📚',
-                      color: Color(0xFFCDB4FF),
+                      color: const Color(0xFFCDB4FF),
+                      onTap: () => _openCard(context, 'Stories'),
                     ),
                     LearningCard(
                       title: 'Rewards',
                       subtitle: 'Stars & badges',
                       emoji: '🏆',
-                      color: Color(0xFFFFC978),
+                      color: const Color(0xFFFFC978),
+                      onTap: () => _openCard(context, 'Rewards'),
                     ),
                   ],
                 ),
@@ -148,12 +173,14 @@ class LearningCard extends StatelessWidget {
   final String subtitle;
   final String emoji;
   final Color color;
+  final VoidCallback onTap;
 
   const LearningCard({
     required this.title,
     required this.subtitle,
     required this.emoji,
     required this.color,
+    required this.onTap,
     super.key,
   });
 
@@ -165,63 +192,49 @@ class LearningCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(26),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$title is coming next!'),
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        },
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 56),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  FittedBox(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Text(emoji, style: const TextStyle(fontSize: 56)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 3),
+              SizedBox(
+                height: 18,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    subtitle,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  SizedBox(
-                    height: 18,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        subtitle,
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
           ),
         ),
       ),
