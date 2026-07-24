@@ -4,6 +4,8 @@ import 'features/alphabet/screens/alphabet_lesson_screen.dart';
 import 'features/numbers/screens/number_levels_screen.dart';
 import 'features/colors/screens/color_lesson_screen.dart';
 import 'features/shapes/screens/shape_lesson_screen.dart';
+import 'features/animals/screens/animal_lesson_screen.dart';
+import 'features/things/screens/everyday_things_screen.dart';
 
 void main() {
   runApp(const LittleHeroApp());
@@ -58,6 +60,22 @@ class HomeScreen extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (_) => const ShapeLessonScreen()),
+      );
+      return;
+    }
+
+    if (title == 'Animals') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const AnimalLessonScreen()),
+      );
+      return;
+    }
+
+    if (title == 'Everyday Things') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const EverydayThingsScreen()),
       );
       return;
     }
@@ -169,6 +187,20 @@ class HomeScreen extends StatelessWidget {
                       emoji: '🔺',
                       color: const Color(0xFF9ED9FF),
                       onTap: () => _openCard(context, 'Shapes'),
+                    ),
+                    LearningCard(
+                      title: 'Animals',
+                      subtitle: 'Wild & pet animals',
+                      emoji: '🦁',
+                      color: const Color(0xFFFFB56B),
+                      onTap: () => _openCard(context, 'Animals'),
+                    ),
+                    LearningCard(
+                      title: 'Everyday Things',
+                      subtitle: 'Furniture & objects',
+                      emoji: '🪑',
+                      color: const Color(0xFF82D8EA),
+                      onTap: () => _openCard(context, 'Everyday Things'),
                     ),
                     LearningCard(
                       title: 'Stories',
