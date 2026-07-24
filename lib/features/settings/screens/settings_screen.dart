@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const Divider(height: 1),
                     SwitchListTile(
                       value: _automaticVoice,
-                      secondary: const Icon(Icons.autoplay_rounded),
+                      secondary: const Icon(Icons.play_circle_outline_rounded),
                       title: const Text(
                         'Automatic Voice',
                         style: TextStyle(fontWeight: FontWeight.w800),
