@@ -181,7 +181,7 @@ class _VocabularyLessonScreenState extends State<VocabularyLessonScreen>
                       final selected = index == _currentIndex;
 
                       return Material(
-                        color: widget.primaryColor.withOpacity(0.13),
+                        color: widget.primaryColor.withValues(alpha: 0.13),
                         borderRadius: BorderRadius.circular(20),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
@@ -309,7 +309,7 @@ class _VocabularyLessonScreenState extends State<VocabularyLessonScreen>
             child: LinearProgressIndicator(
               minHeight: 13,
               value: (_currentIndex + 1) / widget.items.length,
-              backgroundColor: widget.primaryColor.withOpacity(0.20),
+              backgroundColor: widget.primaryColor.withValues(alpha: 0.20),
               valueColor: AlwaysStoppedAnimation<Color>(widget.primaryColor),
             ),
           ),
@@ -350,7 +350,7 @@ class _VocabularyLessonScreenState extends State<VocabularyLessonScreen>
           ScaleTransition(
             scale: _bounceAnimation,
             child: Material(
-              color: widget.primaryColor.withOpacity(0.16),
+              color: widget.primaryColor.withValues(alpha: 0.16),
               elevation: 4,
               borderRadius: BorderRadius.circular(35),
               child: InkWell(
