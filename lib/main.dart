@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'features/alphabet/screens/alphabet_lesson_screen.dart';
 import 'features/numbers/screens/number_levels_screen.dart';
 import 'features/colors/screens/color_lesson_screen.dart';
+import 'features/shapes/screens/shape_lesson_screen.dart';
 
 void main() {
   runApp(const LittleHeroApp());
@@ -49,6 +50,14 @@ class HomeScreen extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (_) => const ColorLessonScreen()),
+      );
+      return;
+    }
+
+    if (title == 'Shapes') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const ShapeLessonScreen()),
       );
       return;
     }
