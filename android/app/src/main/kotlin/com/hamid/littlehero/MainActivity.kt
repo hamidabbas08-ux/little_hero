@@ -1,4 +1,4 @@
-package com.hamid.little_hero
+package com.hamid.littlehero
 
 import io.flutter.embedding.android.FlutterActivity
 
