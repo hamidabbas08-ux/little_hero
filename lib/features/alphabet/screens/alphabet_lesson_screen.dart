@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import 'alphabet_quiz_screen.dart';
+
 class AlphabetItem {
   final String letter;
   final String word;
@@ -402,6 +404,18 @@ class _AlphabetLessonScreenState extends State<AlphabetLessonScreen>
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Start quiz',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const AlphabetQuizScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.quiz_rounded, size: 28),
+          ),
           IconButton(
             tooltip: 'Choose letter',
             onPressed: _showAlphabetPicker,
