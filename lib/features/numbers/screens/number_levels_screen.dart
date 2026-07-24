@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/number_progress.dart';
 import 'number_lesson_screen.dart';
 
 class NumberLevel {
@@ -8,7 +9,6 @@ class NumberLevel {
   final int endNumber;
   final String emoji;
   final Color color;
-  final bool unlocked;
 
   const NumberLevel({
     required this.level,
@@ -16,7 +16,6 @@ class NumberLevel {
     required this.endNumber,
     required this.emoji,
     required this.color,
-    required this.unlocked,
   });
 }
 
@@ -27,7 +26,6 @@ const List<NumberLevel> numberLevels = [
     endNumber: 20,
     emoji: '⭐',
     color: Color(0xFF61D095),
-    unlocked: true,
   ),
   NumberLevel(
     level: 2,
@@ -35,7 +33,6 @@ const List<NumberLevel> numberLevels = [
     endNumber: 40,
     emoji: '🚀',
     color: Color(0xFF80C7FF),
-    unlocked: false,
   ),
   NumberLevel(
     level: 3,
@@ -43,7 +40,6 @@ const List<NumberLevel> numberLevels = [
     endNumber: 60,
     emoji: '🌈',
     color: Color(0xFFFFA8C3),
-    unlocked: false,
   ),
   NumberLevel(
     level: 4,
@@ -51,7 +47,6 @@ const List<NumberLevel> numberLevels = [
     endNumber: 80,
     emoji: '🏆',
     color: Color(0xFFFFCF62),
-    unlocked: false,
   ),
   NumberLevel(
     level: 5,
@@ -59,22 +54,52 @@ const List<NumberLevel> numberLevels = [
     endNumber: 100,
     emoji: '👑',
     color: Color(0xFFC7ACFF),
-    unlocked: false,
   ),
 ];
 
-class NumberLevelsScreen extends StatelessWidget {
+class NumberLevelsScreen extends StatefulWidget {
   const NumberLevelsScreen({super.key});
 
-  void _openLevel(BuildContext context, NumberLevel level) {
-    if (!level.unlocked) {
+  @override
+  State<NumberLevelsScreen> createState() => _NumberLevelsScreenState();
+}
+
+class _NumberLevelsScreenState extends State<NumberLevelsScreen> {
+  int _highestUnlockedLevel = 1;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final highest = await NumberProgress.highestUnlockedLevel();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _highestUnlockedLevel = highest;
+      _loading = false;
+    });
+  }
+
+  Future<void> _openLevel(NumberLevel level) async {
+    final unlocked = level.level <= _highestUnlockedLevel;
+
+    if (!unlocked) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Complete Level ${level.level - 1} first.')),
+        SnackBar(
+          content: Text('Complete Level ${level.level - 1} Quiz first.'),
+        ),
       );
       return;
     }
 
-    Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute<void>(
         builder: (_) => NumberLessonScreen(
@@ -84,6 +109,8 @@ class NumberLevelsScreen extends StatelessWidget {
         ),
       ),
     );
+
+    await _loadProgress();
   }
 
   @override
@@ -100,40 +127,48 @@ class NumberLevelsScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 20, 18, 28),
-          children: [
-            const Text(
-              'Choose Your Level',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF264D39),
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(18, 20, 18, 28),
+                children: [
+                  const Text(
+                    'Choose Your Level',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF264D39),
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  const Text(
+                    'Pass each quiz to unlock the next level!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF567464),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  ...numberLevels.map((level) {
+                    final unlocked = level.level <= _highestUnlockedLevel;
+
+                    final completed = level.level < _highestUnlockedLevel;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 15),
+                      child: _NumberLevelCard(
+                        level: level,
+                        unlocked: unlocked,
+                        completed: completed,
+                        onTap: () => _openLevel(level),
+                      ),
+                    );
+                  }),
+                ],
               ),
-            ),
-            const SizedBox(height: 7),
-            const Text(
-              'Listen, learn and count from 1 to 100!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF567464),
-              ),
-            ),
-            const SizedBox(height: 22),
-            ...numberLevels.map((level) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 15),
-                child: _NumberLevelCard(
-                  level: level,
-                  onTap: () => _openLevel(context, level),
-                ),
-              );
-            }),
-          ],
-        ),
       ),
     );
   }
@@ -141,15 +176,22 @@ class NumberLevelsScreen extends StatelessWidget {
 
 class _NumberLevelCard extends StatelessWidget {
   final NumberLevel level;
+  final bool unlocked;
+  final bool completed;
   final VoidCallback onTap;
 
-  const _NumberLevelCard({required this.level, required this.onTap});
+  const _NumberLevelCard({
+    required this.level,
+    required this.unlocked,
+    required this.completed,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: level.unlocked ? level.color : const Color(0xFFE0E4E2),
-      elevation: level.unlocked ? 5 : 1,
+      color: unlocked ? level.color : const Color(0xFFE0E4E2),
+      elevation: unlocked ? 5 : 1,
       borderRadius: BorderRadius.circular(28),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -167,7 +209,11 @@ class _NumberLevelCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: Text(
-                  level.unlocked ? level.emoji : '🔒',
+                  completed
+                      ? '✅'
+                      : unlocked
+                      ? level.emoji
+                      : '🔒',
                   style: const TextStyle(fontSize: 42),
                 ),
               ),
@@ -181,31 +227,34 @@ class _NumberLevelCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.w900,
-                        color: level.unlocked
+                        color: unlocked
                             ? const Color(0xFF24352C)
                             : const Color(0xFF777D79),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Numbers ${level.startNumber}–${level.endNumber}',
+                      'Numbers ${level.startNumber}–'
+                      '${level.endNumber}',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        color: level.unlocked
+                        color: unlocked
                             ? const Color(0xFF314D3E)
                             : const Color(0xFF898E8B),
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      level.unlocked
-                          ? 'Tap to start with sound'
-                          : 'Complete the previous level',
+                      completed
+                          ? 'Level completed'
+                          : unlocked
+                          ? 'Tap to start learning'
+                          : 'Pass the previous quiz',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: level.unlocked
+                        color: unlocked
                             ? const Color(0xFF3E6450)
                             : const Color(0xFF949895),
                       ),
@@ -214,11 +263,13 @@ class _NumberLevelCard extends StatelessWidget {
                 ),
               ),
               Icon(
-                level.unlocked
+                completed
+                    ? Icons.check_circle_rounded
+                    : unlocked
                     ? Icons.play_circle_fill_rounded
                     : Icons.lock_rounded,
                 size: 39,
-                color: level.unlocked
+                color: unlocked
                     ? const Color(0xFF24573C)
                     : const Color(0xFF8E9490),
               ),

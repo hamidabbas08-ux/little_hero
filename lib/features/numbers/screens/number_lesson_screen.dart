@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../data/number_words.dart';
+import 'number_quiz_screen.dart';
 
 class NumberLessonScreen extends StatefulWidget {
   final int level;
@@ -588,12 +589,14 @@ class _NumberLessonScreenState extends State<NumberLessonScreen>
         Expanded(
           child: FilledButton.icon(
             onPressed: isLast
-                ? () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Excellent! Level ${widget.level} completed. '
-                          'The quiz will be added next.',
+                ? () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute<bool>(
+                        builder: (_) => NumberQuizScreen(
+                          level: widget.level,
+                          startNumber: widget.startNumber,
+                          endNumber: widget.endNumber,
                         ),
                       ),
                     );
