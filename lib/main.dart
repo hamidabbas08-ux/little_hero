@@ -6,6 +6,7 @@ import 'features/colors/screens/color_lesson_screen.dart';
 import 'features/shapes/screens/shape_lesson_screen.dart';
 import 'features/animals/screens/animal_lesson_screen.dart';
 import 'features/things/screens/everyday_things_screen.dart';
+import 'features/stories/screens/stories_library_screen.dart';
 
 void main() {
   runApp(const LittleHeroApp());
@@ -76,6 +77,14 @@ class HomeScreen extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (_) => const EverydayThingsScreen()),
+      );
+      return;
+    }
+
+    if (title == 'Stories') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const StoriesLibraryScreen()),
       );
       return;
     }
