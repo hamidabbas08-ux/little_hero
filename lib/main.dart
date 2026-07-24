@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'features/alphabet/screens/alphabet_lesson_screen.dart';
+import 'features/numbers/screens/number_levels_screen.dart';
 
 void main() {
   runApp(const LittleHeroApp());
@@ -31,6 +32,14 @@ class HomeScreen extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute<void>(builder: (_) => const AlphabetLessonScreen()),
+      );
+      return;
+    }
+
+    if (title == 'Numbers') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const NumberLevelsScreen()),
       );
       return;
     }
