@@ -14,11 +14,7 @@ class LittleHeroApp extends StatelessWidget {
       title: 'Little Hero',
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6C63FF),
-          brightness: Brightness.light,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
       ),
       home: const HomeScreen(),
     );
@@ -33,6 +29,8 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Container(
+          width: double.infinity,
+          height: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -74,8 +72,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.settings_rounded, size: 30),
+                      onPressed: null,
+                      icon: Icon(Icons.settings_rounded, size: 30),
                     ),
                   ],
                 ),
@@ -92,43 +90,43 @@ class HomeScreen extends StatelessWidget {
               ),
               Expanded(
                 child: GridView.count(
-                  padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+                  padding: const EdgeInsets.fromLTRB(18, 8, 18, 24),
                   crossAxisCount: 2,
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
-                  childAspectRatio: 1.05,
-                  children: [
-                    _LearningCard(
+                  childAspectRatio: 1.0,
+                  children: const [
+                    LearningCard(
                       title: 'Alphabet',
                       subtitle: 'A B C',
                       emoji: '🔤',
                       color: Color(0xFFFFD166),
                     ),
-                    _LearningCard(
+                    LearningCard(
                       title: 'Numbers',
                       subtitle: '1 2 3',
                       emoji: '🔢',
                       color: Color(0xFF8DE4AF),
                     ),
-                    _LearningCard(
+                    LearningCard(
                       title: 'Colors',
                       subtitle: 'Learn colors',
                       emoji: '🎨',
                       color: Color(0xFFFF9EB5),
                     ),
-                    _LearningCard(
+                    LearningCard(
                       title: 'Shapes',
                       subtitle: 'Circle & Square',
                       emoji: '🔺',
                       color: Color(0xFF9ED9FF),
                     ),
-                    _LearningCard(
+                    LearningCard(
                       title: 'Stories',
                       subtitle: 'Listen & read',
                       emoji: '📚',
                       color: Color(0xFFCDB4FF),
                     ),
-                    _LearningCard(
+                    LearningCard(
                       title: 'Rewards',
                       subtitle: 'Stars & badges',
                       emoji: '🏆',
@@ -145,27 +143,28 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _LearningCard extends StatelessWidget {
+class LearningCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String emoji;
   final Color color;
 
-  const _LearningCard({
+  const LearningCard({
     required this.title,
     required this.subtitle,
     required this.emoji,
     required this.color,
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(26),
       elevation: 4,
+      borderRadius: BorderRadius.circular(26),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(26),
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -175,30 +174,54 @@ class _LearningCard extends StatelessWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 54)),
-              const SizedBox(height: 10),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          emoji,
+                          style: const TextStyle(fontSize: 56),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  SizedBox(
+                    height: 18,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        subtitle,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
