@@ -1,0 +1,168 @@
+name: Signed Android Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-signed-android:
+    name: Build Signed APK and AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Verify required signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -e
+
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "ANDROID_KEYSTORE_BASE64 secret is missing."
+            exit 1
+          fi
+
+          if [ -z "$STORE_PASSWORD" ]; then
+            echo "ANDROID_KEYSTORE_PASSWORD secret is missing."
+            exit 1
+          fi
+
+          if [ -z "$KEY_PASSWORD" ]; then
+            echo "ANDROID_KEY_PASSWORD secret is missing."
+            exit 1
+          fi
+
+          if [ -z "$KEY_ALIAS" ]; then
+            echo "ANDROID_KEY_ALIAS secret is missing."
+            exit 1
+          fi
+
+          echo "All four signing secrets are available."
+
+      - name: Restore signing keystore
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -e
+
+          printf '%s' "$KEYSTORE_BASE64" \
+            | base64 --decode \
+            > android/app/little-hero-upload.jks
+
+          cat > android/key.properties <<PROPERTIES
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=little-hero-upload.jks
+          PROPERTIES
+
+          test -s android/app/little-hero-upload.jks
+          test -s android/key.properties
+
+          keytool -list \
+            -keystore android/app/little-hero-upload.jks \
+            -storepass "$STORE_PASSWORD" \
+            -alias "$KEY_ALIAS" \
+            >/dev/null
+
+          echo "Signing keystore restored and verified."
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build signed release APK
+        run: flutter build apk --release
+
+      - name: Build signed release AAB
+        run: flutter build appbundle --release
+
+      - name: Prepare release files
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p release-files
+
+          cp \
+            build/app/outputs/flutter-apk/app-release.apk \
+            release-files/Little-Hero-Signed-Release.apk
+
+          cp \
+            build/app/outputs/bundle/release/app-release.aab \
+            release-files/Little-Hero-Signed-Release.aab
+
+          sha256sum \
+            release-files/Little-Hero-Signed-Release.apk \
+            release-files/Little-Hero-Signed-Release.aab \
+            > release-files/SHA256SUMS.txt
+
+          ls -lh release-files
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Little-Hero-Signed-APK
+          path: release-files/Little-Hero-Signed-Release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload signed AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: Little-Hero-Signed-AAB
+          path: release-files/Little-Hero-Signed-Release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: Little-Hero-Release-Checksums
+          path: release-files/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove temporary signing files
+        if: always()
+        shell: bash
+        run: |
+          rm -f android/key.properties
+          rm -f android/app/little-hero-upload.jks
